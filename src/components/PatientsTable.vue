@@ -25,8 +25,13 @@ export default {
   },
   async created() {
     // FIXME: Move URL to some config
-    const client = FHIR.client("http://localhost:3000/fhir/");
-    const res = await client.request("Patient", { pageLimit: 10, flat: true });
+    // FIXME: Move client to some module
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    const path = '/fhir';
+    const url = `${protocol}//${host}${path}`;
+    const client = FHIR.client(url);
+    const res = await client.request("Patient", { pageLimit: 3, flat: true });
     this.items = res;
   }
 }
