@@ -1,6 +1,8 @@
-import FHIR from "fhirclient";
+import FHIR from "fhirclient"
 
-const url = process.env.VUE_APP_FHIR_URL;
-const client = FHIR.client(url);
+const url = process.env.VUE_APP_FHIR_URL
+if (typeof url === "undefined") {
+    throw "Constant VUE_APP_FHIR_URL is undefined."
+} 
 
-export default client;
+export default FHIR.client(url)
