@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import FHIR from "fhirclient";
+import client from "@/client";
 
 export default {
   data() {
@@ -24,15 +24,7 @@ export default {
     }
   },
   async created() {
-    // FIXME: Move URL to some config
-    // FIXME: Move client to some module
-    const protocol = window.location.protocol;
-    const host = window.location.host;
-    const path = '/fhir';
-    const url = `${protocol}//${host}${path}`;
-    const client = FHIR.client(url);
-    const res = await client.request("Patient", { pageLimit: 3, flat: true });
-    this.items = res;
+    this.items = await client.request("Patient", { pageLimit: 3, flat: true });
   }
 }
 </script>
