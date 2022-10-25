@@ -1,30 +1,92 @@
 <template>
-  <b-table striped hover :fields="fields" :items="items">
-    <template #cell(familyName)="data">
-      {{ data.item.name[0] && data.item.name[0].family }}
-    </template>
-    <template #cell(givenName)="data">
-      {{ data.item.name[0] && data.item.name[0].given.join(" ") }}
-    </template>
-  </b-table>
+  <div>
+    <b-pagination :per-page="perPage" v-model="currentPage" :total-rows="totalRows" />
+    <b-table striped hover :fields="fields" :items="update" :per-page="perPage" :current-page="currentPage"/>
+  </div>
 </template>
 
 <script>
-import client from "@/client";
+import client from "@/client"
+
+const parseDate = s => {
+  if (!s) return s
+  return new Date(Date.parse(s + "T00:00:00"))
+}
+
+const makeIdFormatter = code => (_, __, item) => {
+  const obj = item.identifier.find(id => id?.type?.coding[0]?.code == code)
+  if (obj) return obj.value
+}
+
+const fields = [
+  {
+    key: "id",
+    label: "ID"
+  },
+  {
+    key: "ppn",
+    label: "Passport Number",
+    formatter: makeIdFormatter("PPN")
+  },
+  {
+    key: "ss",
+    label: "Social Security Number",
+    formatter: makeIdFormatter("SS")
+  },
+  {
+    key: "familyName",
+    label: "Family name",
+    formatter: (_, __, item) => item.name[0] && item.name[0].family
+  },
+  {
+    key: "givenName",
+    label: "Given name",
+    formatter: (_, __, item) => item.name[0] && item.name[0].given.join(" ")
+  },
+  {
+    key: "gender",
+    label: "Gender",
+    formatter: value => value
+  },
+  {
+    key: "birthDate",
+    label: "Birthdate",
+    formatter: value => parseDate(value).toLocaleDateString()
+  }
+]
+
+const fetch = (perPage, currentPage) => {
+  const query = new URLSearchParams()
+
+  if (perPage > 0) {
+    query.set("_count", perPage)
+  }
+
+  if (currentPage > 1) {
+    query.set("_getpagesoffset", perPage * (currentPage - 1))
+  }
+
+  return client.request("Patient?" + query)
+}
 
 export default {
   data() {
     return {
-      fields: [
-        { key: "id", label: "ID" },
-        { key: "familyName", label: "Family name" },
-        { key: "givenName", label: "Given name" }
-      ],
-      items: []
+      perPage: 10,
+      currentPage: 1,
+      fields,
+      update: async ctx => {
+        try {
+          const response = await fetch(ctx.perPage, ctx.currentPage)
+          this.totalRows = response.total
+          return response.entry.map(e => e.resource)
+        } catch (error) {
+          console.error(error)
+          return []
+        }
+      },
+      totalRows: 0
     }
-  },
-  async created() {
-    this.items = await client.request("Patient", { pageLimit: 3, flat: true });
   }
 }
 </script>
