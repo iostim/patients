@@ -15,7 +15,7 @@ Vue.use(IconsPlugin);
 
 const routes = [
   { name: 'index', path: '/',         component: require('@/pages/index').default },
-  { name: 'edit',  path: '/edit/:id', component: require('@/pages/edit').default }
+  { name: 'edit',  path: '/edit/:id', component: require('@/pages/edit').default, props: true }
 ];
 
 const router = new VueRouter({

@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import PatientsTable from '@/components/PatientsTable.vue'
+import PatientsTable from '@/components/PatientsTable'
 
 export default {
   components: {

@@ -14,17 +14,8 @@
 </template>
 
 <script>
-import client from "@/client"
-
-const parseDate = s => {
-  if (!s) return s
-  return new Date(Date.parse(s + "T00:00:00"))
-}
-
-const makeIdFormatter = code => (_, __, item) => {
-  const obj = item.identifier.find(id => id?.type?.coding[0]?.code == code)
-  if (obj) return obj.value
-}
+import { search } from "@/client"
+import Patient from "@/model/Patient"
 
 const fields = [
   {
@@ -33,49 +24,30 @@ const fields = [
   },
   {
     key: "ppn",
-    label: "Passport Number",
-    formatter: makeIdFormatter("PPN")
+    label: "Passport Number"
   },
   {
     key: "ss",
-    label: "Social Security Number",
-    formatter: makeIdFormatter("SS")
+    label: "Social Security Number"
   },
   {
     key: "familyName",
-    label: "Family name",
-    formatter: (_, __, item) => item.name[0] && item.name[0].family
+    label: "Family name"
   },
   {
     key: "givenName",
-    label: "Given name",
-    formatter: (_, __, item) => item.name[0] && item.name[0].given.join(" ")
+    label: "Given name"
   },
   {
     key: "gender",
-    label: "Gender",
-    formatter: value => value
+    label: "Gender"
   },
   {
     key: "birthDate",
     label: "Birthdate",
-    formatter: value => parseDate(value).toLocaleDateString()
+    formatter: value => value?.toLocaleDateString()
   }
 ]
-
-const fetch = (perPage, currentPage) => {
-  const query = new URLSearchParams()
-
-  if (perPage > 0) {
-    query.set("_count", perPage)
-  }
-
-  if (currentPage > 1) {
-    query.set("_getpagesoffset", perPage * (currentPage - 1))
-  }
-
-  return client.request("Patient?" + query)
-}
 
 export default {
   data() {
@@ -89,9 +61,11 @@ export default {
   methods: {
     async update(ctx) {
       try {
-        const response = await fetch(ctx.perPage, ctx.currentPage)
-        this.totalRows = response.total
-        return response.entry.map(e => e.resource)
+        const response = await search(ctx.perPage, ctx.currentPage)
+        const total = response.total
+        const entries = response.entry.map(e => new Patient(e.resource))
+        this.totalRows = total
+        return entries
       } catch (error) {
         console.error(error)
         return []
