@@ -1,15 +1,14 @@
 <template>
   <div>
-    <h1>Patients</h1>
-    <PatientsTable/>
+    <h1>Index patients</h1>
+    <patients-table/>
   </div>
 </template>
 
 <script>
-import PatientsTable from './components/PatientsTable.vue'
+import PatientsTable from '@/components/PatientsTable.vue'
 
 export default {
-  name: 'App',
   components: {
     PatientsTable
   }

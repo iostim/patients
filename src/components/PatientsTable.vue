@@ -1,7 +1,15 @@
 <template>
   <div>
     <b-pagination :per-page="perPage" v-model="currentPage" :total-rows="totalRows" />
-    <b-table striped hover :fields="fields" :items="update" :per-page="perPage" :current-page="currentPage"/>
+    <b-table
+      striped
+      hover
+      :fields="fields"
+      :items="update"
+      :per-page="perPage"
+      :current-page="currentPage"
+      @row-clicked="edit"
+    />
   </div>
 </template>
 
@@ -75,17 +83,22 @@ export default {
       perPage: 10,
       currentPage: 1,
       fields,
-      update: async ctx => {
-        try {
-          const response = await fetch(ctx.perPage, ctx.currentPage)
-          this.totalRows = response.total
-          return response.entry.map(e => e.resource)
-        } catch (error) {
-          console.error(error)
-          return []
-        }
-      },
       totalRows: 0
+    }
+  },
+  methods: {
+    async update(ctx) {
+      try {
+        const response = await fetch(ctx.perPage, ctx.currentPage)
+        this.totalRows = response.total
+        return response.entry.map(e => e.resource)
+      } catch (error) {
+        console.error(error)
+        return []
+      }
+    },
+    edit(item) {
+      this.$router.push({name: 'edit', params: {id: item.id}})
     }
   }
 }

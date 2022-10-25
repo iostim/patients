@@ -1,25 +1,35 @@
 import Vue from 'vue';
+import VueRouter from 'vue-router';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
 import singleSpaVue from 'single-spa-vue';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
-import App from './App.vue';
 
 Vue.config.productionTip = false;
 
+Vue.use(VueRouter);
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
+
+const routes = [
+  { name: 'index', path: '/',         component: require('@/pages/index').default },
+  { name: 'edit',  path: '/edit/:id', component: require('@/pages/edit').default }
+];
+
+const router = new VueRouter({
+  mode: 'history',
+  routes
+});
 
 const vueLifecycles = singleSpaVue({
   Vue,
   appOptions: {
     render(h) {
-      return h(App, {
-        props: {}
-      });
+      return h(Vue.component('RouterView'))
     },
+    router
   },
 });
 
